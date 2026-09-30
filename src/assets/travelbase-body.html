@@ -1,0 +1,789 @@
+
+    <div class="header">
+        <div class="header-top-row">
+            <div class="logo-text">
+                <h1>TravelBase</h1>
+            </div>
+            <div class="header-right">
+                <span class="header-step-label" id="headerStepLabel">Шаг 1 из 3</span>
+                <div id="tbAuthMount"></div>
+            </div>
+        </div>
+
+        <div class="header-subtitle">Маршруты по отзывам путешественников</div>
+    </div>
+    <div id="stepIndicator" class="step-indicator">
+        <div class="step-progress-fill" id="stepProgressFill" style="width: 33.3%"></div>
+        <!-- Hidden original elements for JS compat -->
+        <div class="step-circle active" id="stepCircle1" style="display:none">1</div>
+        <div class="step-line" id="stepLine1" style="display:none"></div>
+        <div class="step-circle future" id="stepCircle2" style="display:none">2</div>
+        <div class="step-line" id="stepLine2" style="display:none"></div>
+        <div class="step-circle future" id="stepCircle3" style="display:none">3</div>
+    </div>
+    <div id="debugStatus" class="debug-status"></div>
+
+    <div class="content-area">
+
+    <!-- Step 1: Figma travel home -->
+    <div id="step1" class="section step-enter s1-modern">
+
+        <div class="s1-gradient-bg">
+            <div class="s1-blob s1-blob-1"></div>
+            <div class="s1-blob s1-blob-2"></div>
+            <div class="s1-blob s1-blob-3"></div>
+        </div>
+
+        <div class="s1-topbar">
+            <a class="s1-menu" href="/trips" aria-label="Поездки">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </a>
+            <div class="s1-loc">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="s1LocLabel">Весь мир</span>
+            </div>
+            <span class="s1-top-spacer"></span>
+        </div>
+
+        <div class="s1-hero">
+            <p class="s1-hello" id="s1Hello">Привет</p>
+            <h1 class="s1-title" id="s1Title">Куда отправимся?</h1>
+            <p class="s1-subtitle" id="s1Subtitle" hidden>Система анализирует более 50 000 реальных отзывов и маршрутов опытных путешественников, чтобы составить ваш тур</p>
+        </div>
+
+        <div class="s1-search-card">
+            <div class="s1-search-row">
+                <div class="s1-search-field s1-unified-field">
+                    <div class="s1-search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <div class="s1-unified-wrap autocomplete">
+                        <input type="text" id="unifiedSearchInput" class="s1-input s1-input-unified" placeholder="Куда хотите поехать?" oninput="onUnifiedSearchInput()" onfocus="onUnifiedSearchFocus()" autocomplete="off" />
+                        <button type="button" class="s1-clear-btn" id="s1ClearBtn" onclick="clearUnifiedSearch()" aria-label="Очистить" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                        <div id="unifiedSuggestions" class="suggestions s1-unified-suggestions hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s1-selected-chip" id="s1SelectedChip">
+                <div class="s1-chip-info">
+                    <span class="s1-chip-flag" id="s1ChipFlag">🌍</span>
+                    <div class="s1-chip-texts">
+                        <span class="s1-chip-city" id="s1ChipCity"></span>
+                        <span class="s1-chip-country" id="s1ChipCountry"></span>
+                    </div>
+                </div>
+                <div class="s1-best-time" id="s1BestTime">
+                    <div class="s1-best-time-score" id="s1BestTimeScore">9/10</div>
+                    <div class="s1-best-time-label" id="s1BestTimeLabel">Сейчас идеально</div>
+                </div>
+            </div>
+
+            <input type="hidden" id="countryInput" oninput="onCountryInput()" />
+            <input type="hidden" id="cityInput" oninput="onCityInput()" />
+            <div id="countrySuggestions" class="suggestions hidden" style="display:none"></div>
+            <div id="citySuggestions" class="suggestions hidden" style="display:none"></div>
+        </div>
+
+        <div class="s1-region-toggle" role="tablist" aria-label="Регион">
+            <button type="button" class="s1-region-btn is-on" id="regionWorldBtn" data-region="world" role="tab" aria-selected="true" onclick="setTravelRegion('world')">Мир</button>
+            <button type="button" class="s1-region-btn" id="regionRussiaBtn" data-region="russia" role="tab" aria-selected="false" onclick="setTravelRegion('russia')">Россия</button>
+        </div>
+
+        <div class="s1-cta-wrap">
+            <button type="button" class="s1-next-btn" id="s1NextBtn" disabled onclick="nextStep(2)">
+                Собрать маршрут
+            </button>
+        </div>
+
+        <div class="s1-featured" id="s1Featured"></div>
+
+        <div class="s1-cats" aria-label="Категории">
+            <button type="button" class="s1-cat is-on" id="catAll" onclick="setHomeTheme(this, 'Все')">Все</button>
+            <button type="button" class="s1-cat" id="catBeach" onclick="setHomeTheme(this, 'Пляж')">Море</button>
+            <button type="button" class="s1-cat" id="catMountain" onclick="setHomeTheme(this, 'Природа')">Горы</button>
+        </div>
+        <p class="region-kicker" id="regionKicker" hidden>Направления</p>
+
+        <div class="s1-dream" id="s1Dream">
+            <button type="button" class="s1-dream-trigger" id="s1DreamTrigger" onclick="toggleDreamPrompt()">
+                <span class="s1-dream-icon" aria-hidden="true"></span>
+                <span class="s1-dream-text">Опишите поездку — подберём направление</span>
+                <svg class="s1-dream-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="s1-dream-body" id="s1DreamBody">
+                <div class="s1-dream-examples">
+                    <span class="s1-dream-example-label">Например:</span>
+                    <button type="button" class="s1-dream-example" onclick="useDreamExample(this)">Спокойный отдых у моря в октябре</button>
+                    <button type="button" class="s1-dream-example" onclick="useDreamExample(this)">Романтический weekend в Европе</button>
+                    <button type="button" class="s1-dream-example" onclick="useDreamExample(this)">Гастрономия и вино, тёплая страна</button>
+                </div>
+                <div class="s1-dream-input-wrap">
+                    <textarea id="s1DreamInput" class="s1-dream-input" maxlength="300" placeholder="Опишите своё идеальное путешествие.&#10;Например: «Тёплое море, спокойствие, гастрономия. Хочется в октябре, бюджет средний.»" rows="4"></textarea>
+                    <button type="button" class="s1-dream-submit" id="s1DreamSubmit" onclick="submitDreamPrompt()">
+                        <span class="s1-dream-submit-text">Подобрать направление</span>
+                        <span class="s1-dream-submit-spinner"></span>
+                    </button>
+                </div>
+                <div class="s1-dream-status" id="s1DreamStatus"></div>
+            </div>
+        </div>
+
+        <div class="s1-cities-section" id="s1SectionWorld">
+            <div class="s1-cities-label">
+                <span>Мир</span>
+            </div>
+            <div class="s1-cities-grid" id="popularScroll"></div>
+        </div>
+        <div class="s1-cities-section" id="s1SectionRussia">
+            <div class="s1-cities-label">
+                <span>Россия</span>
+            </div>
+            <div class="s1-cities-grid" id="popularScrollRussia"></div>
+        </div>
+
+        <select id="citySelect" style="display:none"></select>
+
+        <div class="example-routes" id="exampleRoutesSection">
+            <div class="example-routes-header">
+                <span id="exampleRoutesTitle">Готовые маршруты</span>
+            </div>
+            <div class="example-routes-scroll" id="exampleRoutesScroll"></div>
+        </div>
+
+    </div>
+
+<!-- Step 2: Trip Type (Figma design system) -->
+    <div id="step2" class="section hidden">
+        <div class="s2-header-row s2-anim">
+            <button type="button" class="s2-back-btn" onclick="goBack(1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <h2>Что хочешь посмотреть?</h2>
+        </div>
+        <div class="wizard-recap" id="s2Recap"></div>
+
+        <!-- Даты (glassmorphism card) -->
+        <div class="s2-dates-card s2-anim s2-anim-d1">
+            <div class="s2-dates-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#005F60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                Даты поездки
+            </div>
+            <div class="s2-mode-toggle" id="s2ModeToggle" data-mode="dates">
+                <button type="button" class="s2-mode-btn selected" data-mode="dates" onclick="setTripMode('dates')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                    Даты
+                </button>
+                <button type="button" class="s2-mode-btn" data-mode="days" onclick="setTripMode('days')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Дни
+                </button>
+            </div>
+
+            <div id="tripDatesBlock">
+                <div class="s2-dates-grid">
+                    <div class="s2-date-field">
+                        <label>Начало</label>
+                        <div class="s2-date-input-wrap">
+                            <svg class="s2-calendar-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                            <input type="date" id="dateStart" onfocus="scrollFieldIntoView(this)" onchange="updateDaysCounter()" onclick="openDatePicker(this)" />
+                        </div>
+                    </div>
+                    <div class="s2-date-field">
+                        <label>Окончание</label>
+                        <div class="s2-date-input-wrap">
+                            <svg class="s2-calendar-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                            <input type="date" id="dateEnd" onfocus="scrollFieldIntoView(this)" onchange="updateDaysCounter()" onclick="openDatePicker(this)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="s2-days-counter" id="daysCounterPill">
+                    <span class="days-num" id="daysCounterNum">0</span>
+                    <span class="days-text" id="daysCounterText">дней</span>
+                </div>
+            </div>
+
+            <div id="tripDaysBlock" class="hidden">
+                <div class="s2-days-input-wrap">
+                    <input type="number" enterkeyhint="done" id="daysCountInput" min="1" placeholder="Количество дней (например: 5)" onfocus="scrollFieldIntoView(this)" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Type Grid with per-button gradients -->
+        <div class="triptype-grid s2-anim s2-anim-d2">
+            <button type="button" class="triptype-button" data-gradient="popular" onclick="toggleTripType(this, 'Популярные места')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                <span class="btn-label">Популярные</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="museums" onclick="toggleTripType(this, 'Музеи')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                <span class="btn-label">Музеи</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="shopping" onclick="toggleTripType(this, 'Шопинг')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span class="btn-label">Шопинг</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="nature" onclick="toggleTripType(this, 'Природа')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg>
+                <span class="btn-label">Природа</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="beach" onclick="toggleTripType(this, 'Пляж')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+                <span class="btn-label">Пляж</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="gastronomy" onclick="toggleTripType(this, 'Гастрономия')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/></svg>
+                <span class="btn-label">Гастрономия</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="nightlife" onclick="toggleTripType(this, 'Ночная жизнь')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <span class="btn-label">Ночная жизнь</span>
+            </button>
+            <button type="button" class="triptype-button" data-gradient="history" onclick="toggleTripType(this, 'История и архитектура')">
+                <span class="tt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+                <span class="btn-label">История</span>
+            </button>
+        </div>
+
+        <!-- Пожелания (glassmorphism card) -->
+        <div class="wishes-wrap s2-anim s2-anim-d3">
+            <div class="wishes-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1D36" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                Ваши пожелания
+            </div>
+            <div class="wishes-input-wrap">
+                <svg class="wishes-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                <textarea id="wishesInput" class="wishes-textarea" maxlength="300" enterkeyhint="done" placeholder="Кофейни с видом, без толп..." oninput="updateWishesCounter()" onfocus="scrollFieldIntoView(this)"></textarea>
+            </div>
+            <div class="wishes-chips" id="wishesChips">
+                <button type="button" class="wishes-chip" data-text="Кофейни с видом"><span class="wishes-chip-emoji">☕</span>Кофейни с видом</button>
+                <button type="button" class="wishes-chip" data-text="Без толп туристов"><span class="wishes-chip-emoji">🚶</span>Без толп</button>
+                <button type="button" class="wishes-chip" data-text="Локальная кухня"><span class="wishes-chip-emoji">🍝</span>Локальная кухня</button>
+                <button type="button" class="wishes-chip" data-text="Инстаграмные места"><span class="wishes-chip-emoji">📸</span>Фото-споты</button>
+                <button type="button" class="wishes-chip" data-text="Тихие районы"><span class="wishes-chip-emoji">🌿</span>Тихие районы</button>
+                <button type="button" class="wishes-chip" data-text="Закаты с видом"><span class="wishes-chip-emoji">🌅</span>Закаты</button>
+            </div>
+            <div class="wishes-counter" id="wishesCounter">0 / 300</div>
+        </div>
+
+        <div class="s2-spacer"></div>
+        <button type="button" class="step1-next-btn s2-anim s2-anim-d4" id="s2NextBtn" onclick="nextStep(3)">
+            Далее
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+    </div>
+
+    <!-- Step 3: Budget per person + travelers -->
+    <div id="step3" class="section hidden">
+        <button type="button" class="back-btn" onclick="goBack(2)">← Назад</button>
+        <div class="section-title">Какой бюджет?</div>
+        <div class="section-subtitle">Подберём идеальный маршрут под твой бюджет</div>
+        <div class="wizard-recap" id="s3Recap"></div>
+
+        <!-- Currency selector (hidden native select for JS logic) -->
+        <select id="currencySelect" class="budget-currency-select" onchange="onCurrencySelect()">
+            <option value="$" data-symbol="$" data-code="USD">🇺🇸 USD ($)</option>
+            <option value="€" data-symbol="€" data-code="EUR">🇪🇺 EUR (€)</option>
+            <option value="₸" data-symbol="₸" data-code="KZT">🇰🇿 KZT (₸)</option>
+            <option value="₽" data-symbol="₽" data-code="RUB">🇷🇺 RUB (₽)</option>
+            <option value="₴" data-symbol="₴" data-code="UAH">🇺🇦 UAH (₴)</option>
+            <option value="Br" data-symbol="Br" data-code="BYN">🇧🇾 BYN (Br)</option>
+            <option value="сўм" data-symbol="сўм" data-code="UZS">🇺🇿 UZS (сўм)</option>
+            <option value="сом" data-symbol="сом" data-code="KGS">🇰🇬 KGS (сом)</option>
+            <option value="с." data-symbol="с." data-code="TJS">🇹🇯 TJS (с.)</option>
+            <option value="m" data-symbol="m" data-code="TMT">🇹🇲 TMT (m)</option>
+            <option value="₼" data-symbol="₼" data-code="AZN">🇦🇿 AZN (₼)</option>
+            <option value="֏" data-symbol="֏" data-code="AMD">🇦🇲 AMD (֏)</option>
+            <option value="₾" data-symbol="₾" data-code="GEL">🇬🇪 GEL (₾)</option>
+            <option value="L" data-symbol="L" data-code="MDL">🇲🇩 MDL (L)</option>
+            <option value="£" data-symbol="£" data-code="GBP">🇬🇧 GBP (£)</option>
+            <option value="₺" data-symbol="₺" data-code="TRY">🇹🇷 TRY (₺)</option>
+            <option value="CHF" data-symbol="CHF" data-code="CHF">🇨🇭 CHF (CHF)</option>
+            <option value="zł" data-symbol="zł" data-code="PLN">🇵🇱 PLN (zł)</option>
+            <option value="Kč" data-symbol="Kč" data-code="CZK">🇨🇿 CZK (Kč)</option>
+            <option value="Ft" data-symbol="Ft" data-code="HUF">🇭🇺 HUF (Ft)</option>
+            <option value="lei" data-symbol="lei" data-code="RON">🇷🇴 RON (lei)</option>
+            <option value="kr" data-symbol="kr" data-code="SEK">🇸🇪 SEK (kr)</option>
+            <option value="kr" data-symbol="kr" data-code="NOK">🇳🇴 NOK (kr)</option>
+            <option value="kr" data-symbol="kr" data-code="DKK">🇩🇰 DKK (kr)</option>
+            <option value="¥" data-symbol="¥" data-code="CNY">🇨🇳 CNY (¥)</option>
+            <option value="¥" data-symbol="¥" data-code="JPY">🇯🇵 JPY (¥)</option>
+            <option value="₩" data-symbol="₩" data-code="KRW">🇰🇷 KRW (₩)</option>
+            <option value="₹" data-symbol="₹" data-code="INR">🇮🇳 INR (₹)</option>
+            <option value="฿" data-symbol="฿" data-code="THB">🇹🇭 THB (฿)</option>
+            <option value="₫" data-symbol="₫" data-code="VND">🇻🇳 VND (₫)</option>
+            <option value="₪" data-symbol="₪" data-code="ILS">🇮🇱 ILS (₪)</option>
+            <option value="د.إ" data-symbol="د.إ" data-code="AED">🇦🇪 AED (د.إ)</option>
+            <option value="﷼" data-symbol="﷼" data-code="SAR">🇸🇦 SAR (﷼)</option>
+            <option value="E£" data-symbol="E£" data-code="EGP">🇪🇬 EGP (E£)</option>
+            <option value="R" data-symbol="R" data-code="ZAR">🇿🇦 ZAR (R)</option>
+            <option value="R$" data-symbol="R$" data-code="BRL">🇧🇷 BRL (R$)</option>
+            <option value="C$" data-symbol="C$" data-code="CAD">🇨🇦 CAD (C$)</option>
+            <option value="A$" data-symbol="A$" data-code="AUD">🇦🇺 AUD (A$)</option>
+            <option value="$" data-symbol="$" data-code="MXN">🇲🇽 MXN ($)</option>
+            <option value="S$" data-symbol="S$" data-code="SGD">🇸🇬 SGD (S$)</option>
+            <option value="RM" data-symbol="RM" data-code="MYR">🇲🇾 MYR (RM)</option>
+            <option value="Rp" data-symbol="Rp" data-code="IDR">🇮🇩 IDR (Rp)</option>
+            <option value="₱" data-symbol="₱" data-code="PHP">🇵🇭 PHP (₱)</option>
+        </select>
+
+        <!-- Currency visual grid -->
+        <div class="currency-label">Валюта</div>
+        <div class="currency-search-wrap" id="currencySearchWrap">
+            <svg class="currency-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" class="currency-search" id="currencySearch" placeholder="Поиск валюты..." oninput="filterCurrencies(this.value)">
+        </div>
+        <div id="currencyGrid" class="currency-grid">
+            <!-- Generated dynamically by initCurrencyGrid() -->
+        </div>
+        <button type="button" class="currency-more-btn" id="currencyMoreBtn" onclick="toggleMoreCurrencies()">Ещё валюты ▾</button>
+
+        <!-- Budget input -->
+        <div class="budget-input-section">
+            <label class="budget-input-label">Бюджет на человека</label>
+            <div class="budget-input-wrap">
+                <span class="budget-currency-sign" id="currencySign">$</span>
+                <input type="text" inputmode="numeric" enterkeyhint="done" id="budgetPerPerson" class="budget-number-input" placeholder="0" oninput="formatBudgetInput(this); readBudgetInputs(); updateGenerateBtn()" onfocus="scrollFieldIntoView(this)" />
+            </div>
+        </div>
+
+        <!-- Travelers counter -->
+        <div class="travelers-section">
+            <label class="budget-input-label">Количество путешественников</label>
+            <div class="travelers-counter">
+                <button type="button" class="travelers-counter-btn" onclick="changeTravelers(-1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="travelers-counter-display">
+                    <span class="tc-emoji">👥</span>
+                    <span class="tc-value" id="travelersDisplay">2</span>
+                </div>
+                <button type="button" class="travelers-counter-btn" onclick="changeTravelers(1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </div>
+            <!-- Hidden input for JS logic -->
+            <input type="number" id="travelersCount" class="travelers-hidden-input" value="2" min="1" max="20" />
+        </div>
+
+        <!-- Total card -->
+        <div id="budgetHint" class="budget-total-hint no-data">
+            <div class="budget-total-inner">
+                <div class="budget-total-label-row">
+                    <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+                    <span class="budget-total-label">Итого на поездку</span>
+                </div>
+                <div class="budget-total-value" id="budgetTotalValue">—</div>
+                <div class="budget-total-sub" id="budgetTotalSub">Укажите бюджет и кол-во людей</div>
+            </div>
+        </div>
+
+        <button type="button" class="generate-btn" id="generateBtn" onclick="generatePlan()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Найти идеальный маршрут
+        </button>
+    </div>
+
+    <!-- Confetti Effect -->
+    <div id="confettiContainer" class="confetti-container" style="display:none;"></div>
+
+    </div><!-- /content-area -->
+
+    <!-- Экран: Мои путешествия (та же архитектура, что и шаги мастера — мгновенное переключение) -->
+    <div id="screenTrips" class="section hidden tb-screen">
+        <div class="tb-scr-kicker">Мои путешествия</div>
+        <h2 class="tb-scr-title">Сохранённые планы</h2>
+        <div id="tripsScreenBody"></div>
+    </div>
+
+    <!-- Экран: Тарифы -->
+    <div id="screenPricing" class="section hidden tb-screen">
+        <div class="tb-scr-kicker">Тарифы</div>
+        <h2 class="tb-scr-title">2 дня бесплатно. Остальное — Plus.</h2>
+        <p class="tb-scr-sub">Для каждого направления первые два дня маршрута сохраняются и больше не меняются. Полный план, кабинет и повторные генерации открываются подпиской. Оплата картами РФ и СНГ через PaySelection.</p>
+        <div id="pricingScreenBody"></div>
+        <p class="tb-scr-note">Оплачивая, вы принимаете <a href="/offer">публичную оферту</a>. Отмена в любой момент до следующего списания.</p>
+    </div>
+
+    <!-- Экран: Личный кабинет -->
+    <div id="screenCabinet" class="section hidden tb-screen">
+        <div class="tb-scr-kicker">Личный кабинет</div>
+        <h2 class="tb-scr-title" id="cabinetName">Путешественник</h2>
+        <div id="cabinetScreenBody"></div>
+    </div>
+
+    <!-- Главное меню приложения: мгновенное, без перезагрузок -->
+    <nav id="mainTabBar" class="main-tabbar" aria-label="Основное меню">
+        <button type="button" class="main-tab-btn is-active" data-main-tab="home" onclick="switchMainTab('home')" aria-label="Главная">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <span>Главная</span>
+        </button>
+        <button type="button" class="main-tab-btn" data-main-tab="trips" onclick="switchMainTab('trips')" aria-label="Поездки">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span>Поездки</span>
+        </button>
+        <button type="button" class="main-tab-btn" data-main-tab="pricing" onclick="switchMainTab('pricing')" aria-label="Тарифы">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+            <span>Тарифы</span>
+        </button>
+        <button type="button" class="main-tab-btn" data-main-tab="cabinet" onclick="switchMainTab('cabinet')" aria-label="Кабинет">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Кабинет</span>
+        </button>
+    </nav>
+
+    <!-- Loading Screen: isolated overlay, outside the home form -->
+    <div id="loading" class="section hidden">
+        <div class="loading-screen">
+            <!-- LAYER 1: Ken Burns city photo background -->
+            <div class="ls-bg-photo" id="lsBgPhoto"></div>
+            <div class="ls-bg-overlay"></div>
+
+            <!-- LAYER 2: Subtle animated mesh on top of photo -->
+            <div class="ls-bg-circle c1"></div>
+            <div class="ls-bg-circle c2"></div>
+
+            <!-- LAYER 3: Main content -->
+            <div class="ls-content">
+                <!-- City badge -->
+                <div class="ls-city-badge" id="lsCityBadge">
+                    <span class="ls-city-flag" id="lsCityFlag">🌍</span>
+                    <span class="ls-city-name" id="lsCityName">Маршрут</span>
+                </div>
+
+                <!-- Title -->
+                <h2 class="ls-title-new">Собираем план<br><em>по опыту путешественников</em></h2>
+                <p class="ls-subtitle-new">Собираем маршрут по картам и гидам...</p>
+
+                <!-- Streaming progress steps -->
+                <ul class="ls-steps" id="lsSteps">
+                    <li class="ls-step" data-step="0">
+                        <span class="ls-step-marker">
+                            <span class="ls-step-icon">🔍</span>
+                            <span class="ls-step-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="ls-step-spinner"></span>
+                        </span>
+                        <span class="ls-step-text">
+                            <span class="ls-step-label">Сверяем отзывы и дневники</span>
+                            <span class="ls-step-sub" id="lsStep0Sub">База знаний по направлению</span>
+                        </span>
+                    </li>
+                    <li class="ls-step" data-step="1">
+                        <span class="ls-step-marker">
+                            <span class="ls-step-icon">📍</span>
+                            <span class="ls-step-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="ls-step-spinner"></span>
+                        </span>
+                        <span class="ls-step-text">
+                            <span class="ls-step-label">Подбираем места под интересы</span>
+                            <span class="ls-step-sub">Лучшие достопримечательности и hidden gems</span>
+                        </span>
+                    </li>
+                    <li class="ls-step" data-step="2">
+                        <span class="ls-step-marker">
+                            <span class="ls-step-icon">🗺️</span>
+                            <span class="ls-step-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="ls-step-spinner"></span>
+                        </span>
+                        <span class="ls-step-text">
+                            <span class="ls-step-label">Строю оптимальный маршрут</span>
+                            <span class="ls-step-sub">По районам с минимум перемещений</span>
+                        </span>
+                    </li>
+                    <li class="ls-step" data-step="3">
+                        <span class="ls-step-marker">
+                            <span class="ls-step-icon">⛅</span>
+                            <span class="ls-step-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="ls-step-spinner"></span>
+                        </span>
+                        <span class="ls-step-text">
+                            <span class="ls-step-label">Загружаю погоду и фото</span>
+                            <span class="ls-step-sub">Финальные штрихи</span>
+                        </span>
+                    </li>
+                </ul>
+
+                <!-- City facts carousel -->
+                <div class="ls-fact-card" id="lsFactCard">
+                    <div class="ls-fact-icon">💡</div>
+                    <div class="ls-fact-body">
+                        <div class="ls-fact-label">Знаете ли вы?</div>
+                        <div class="ls-fact-text" id="lsFactText">Загружаем интересные факты…</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Done button for mobile keyboard -->
+    <div class="input-done-btn" id="inputDoneBar">
+        <button type="button" onclick="dismissKeyboard()">Готово ✓</button>
+    </div>
+
+    <!-- Result — fullscreen immersive map (Roamy-style) -->
+    <div id="result" class="section hidden">
+
+        <!-- LAYER 1: Map fills entire background -->
+        <div id="mapSection" class="hidden">
+            <div id="leafletMap"></div>
+            <div id="mapLegend" class="map-legend" aria-label="Дни на карте"></div>
+            <div id="mapLoadingOverlay" class="map-loading-overlay hidden">
+                <div class="map-loading-inner">
+                    <div class="map-loading-spinner"></div>
+                    <div class="map-loading-text">Загружаем маршруты...</div>
+                    <div class="map-loading-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAYER 2: Floating top bar over map -->
+        <div class="result-top-bar" id="resultTopBar">
+            <button type="button" class="rtb-btn rtb-back" onclick="resetToStart()" aria-label="Назад" title="Назад к поиску">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+                <span class="rtb-back-label">Назад</span>
+            </button>
+            <div class="rtb-info">
+                <div class="rtb-city" id="rtbCity">Маршрут</div>
+                <div class="rtb-meta" id="rtbMeta"></div>
+            </div>
+            <button type="button" class="rtb-btn rtb-heart" id="rtbFavBtn" onclick="toggleResultFavorite()" aria-label="В избранное" title="В избранное">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+            <button id="poiToggleBtn" class="rtb-btn rtb-poi" type="button" onclick="toggleNearbyPois()" aria-label="Места рядом" title="Показать достопримечательности рядом">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span class="rtb-label">Места</span>
+                <span class="rtb-count" id="poiToggleCount" hidden></span>
+            </button>
+            <button class="rtb-btn rtb-feedback" onclick="openFeedback()" aria-label="Обратная связь" title="Обратная связь">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span class="rtb-label">Отзыв</span>
+            </button>
+            <button class="rtb-btn" onclick="switchRoamyTab('share'); document.getElementById('bottomTabs').style.display='block';" aria-label="Поделиться" title="Поделиться">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                <span class="rtb-label">Поделиться</span>
+            </button>
+        </div>
+
+        <!-- Feedback modal -->
+        <div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
+            <div class="fb-modal" role="dialog" aria-labelledby="fbTitle">
+                <div class="fb-modal-head">
+                    <div class="fb-modal-title" id="fbTitle">Поделитесь впечатлением</div>
+                    <button type="button" class="fb-modal-close" onclick="closeFeedback()" aria-label="Закрыть">✕</button>
+                </div>
+                <div class="fb-modal-sub">Помогите нам сделать TravelBase лучше — расскажите, что понравилось или что мешает.</div>
+
+                <div class="fb-rating-label">Оценка</div>
+                <div class="fb-rating" id="fbRating">
+                    <button type="button" class="fb-rating-btn" data-r="1" onclick="fbPickRating(1)" aria-label="1 — очень плохо">😞</button>
+                    <button type="button" class="fb-rating-btn" data-r="2" onclick="fbPickRating(2)" aria-label="2 — плохо">🙁</button>
+                    <button type="button" class="fb-rating-btn" data-r="3" onclick="fbPickRating(3)" aria-label="3 — нормально">😐</button>
+                    <button type="button" class="fb-rating-btn" data-r="4" onclick="fbPickRating(4)" aria-label="4 — хорошо">🙂</button>
+                    <button type="button" class="fb-rating-btn" data-r="5" onclick="fbPickRating(5)" aria-label="5 — отлично">🤩</button>
+                </div>
+
+                <div class="fb-field">
+                    <label for="fbText">Что улучшить или что понравилось</label>
+                    <textarea class="fb-textarea" id="fbText" placeholder="Например: маршрут классный, но в третий день много пешком…" maxlength="2000"></textarea>
+                </div>
+                <div class="fb-field">
+                    <label for="fbContact">Контакт (по желанию)</label>
+                    <input type="text" class="fb-input" id="fbContact" placeholder="Telegram, email — если хотите ответа" maxlength="200">
+                </div>
+
+                <div class="fb-actions">
+                    <span class="fb-status" id="fbStatus"></span>
+                    <button type="button" class="fb-submit" id="fbSubmit" onclick="submitFeedback()">Отправить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAYER 3: Slide-up bottom sheet -->
+        <div class="result-sheet" id="resultSheet">
+            <div class="sheet-resize-handle" id="sheetResizeHandle" title="Потяните, чтобы изменить ширину"></div>
+            <div class="sheet-handle-row" id="sheetHandleRow">
+                <div class="sheet-handle"></div>
+            </div>
+            <div class="sheet-header">
+                <div class="sheet-title-row">
+                    <span class="sheet-dest-name" id="sheetDestName">Маршрут</span>
+                    <button class="sheet-new-route-btn" onclick="resetToStart()">🔄 Новый</button>
+                </div>
+                <div id="daySelection">
+                    <div class="sheet-day-scroller">
+                        <div id="dayButtons" class="day-scroll"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sheet-scroll" id="sheetScroll">
+                <div id="weatherLabel" class="weather-label" style="display:none;"></div>
+                <div id="weatherStrip" class="weather-strip" style="display:none;"></div>
+                <div id="routeContent">
+                    <div id="routeSummary" class="route-summary" style="display:none;"></div>
+                    <div class="route-tools">
+                        <button type="button" class="route-tool-btn" onclick="openAddPlaceDrawer()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            Добавить место
+                        </button>
+                    </div>
+                    <div id="placeCards" class="place-cards"></div>
+                    <div id="dayText" class="day-text-block"></div>
+                </div>
+                <!-- Tab panels inside sheet -->
+                <div id="roamyPanelWishes" class="roamy-tab-content" style="display:none;">
+                    <div class="wishes-panel" id="wishesPanelContent"></div>
+                </div>
+                <div id="roamyPanelBudget" class="roamy-tab-content" style="display:none;"></div>
+                <div id="roamyPanelBooking" class="roamy-tab-content" style="display:none;">
+                    <div id="hotelsPage" class="page-editor hotels-page"></div>
+                    <div class="booking-panel">
+                        <div class="booking-panel-header">
+                            <div class="bp-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></div>
+                            <div>
+                                <div class="bp-title" id="bookingPanelTitle">Билеты и отели</div>
+                                <div class="bp-subtitle" id="bookingPanelSubtitle">Лучшие предложения для вашей поездки</div>
+                            </div>
+                        </div>
+                        <div class="origin-picker origin-picker-flush" id="originPicker">
+                            <label>🛫 Откуда:</label>
+                            <input type="text" id="originCityInput" placeholder="Определяем ваш город..." autocomplete="off">
+                            <span class="origin-iata" id="originIataBadge" style="display:none;"></span>
+                            <span class="origin-detecting" id="originDetecting">⏳</span>
+                        </div>
+                        <div id="bookingLinks" class="booking-links">
+                            <div class="booking-loading">✈️ Подбираем предложения...</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="roamyPanelTips" class="roamy-tab-content" style="display:none;">
+                    <div id="tripInfo" class="info-panel" style="display:none;"></div>
+                </div>
+                <div id="roamyPanelShare" class="roamy-tab-content" style="display:none;">
+                    <div class="share-panel">
+                        <div class="share-panel-icon">📤</div>
+                        <div class="share-panel-title">Поделиться маршрутом</div>
+                        <div class="share-panel-sub">Отправь маршрут друзьям</div>
+                        <button type="button" class="btn-share share-panel-btn" onclick="shareTrip()">Создать ссылку</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Share toast -->
+        <div class="share-toast" id="shareToast">Ссылка скопирована</div>
+        <div class="save-toast" id="saveToast">Страница сохранена</div>
+
+        <div class="ap-overlay" id="addPlaceOverlay" onclick="if(event.target===this)closeAddPlaceDrawer()">
+            <div class="ap-drawer" role="dialog" aria-labelledby="apTitle">
+                <div class="ap-head">
+                    <div id="apTitle">Добавить место</div>
+                    <button type="button" class="ap-close" onclick="closeAddPlaceDrawer()" aria-label="Закрыть">Закрыть</button>
+                </div>
+                <p class="ap-sub">Точки из OpenStreetMap рядом с маршрутом — или поиск по названию.</p>
+                <input type="text" id="apSearch" class="ap-search" placeholder="Название или адрес" enterkeyhint="search">
+                <button type="button" class="ap-search-btn" onclick="submitAddPlaceSearch()">Найти и добавить</button>
+                <div id="apList" class="ap-list"></div>
+            </div>
+        </div>
+
+        <!-- LAYER 4: Fixed bottom nav -->
+        <div id="bottomTabs" class="bottom-tabs" style="display:none;">
+            <div class="roamy-tab-bar">
+                <button type="button" class="roamy-tab-btn active" data-tab="wishes" onclick="switchRoamyTab('wishes')">
+                    <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                    <span class="tab-label">Маршрут</span>
+                </button>
+                <button type="button" class="roamy-tab-btn" data-tab="budget" onclick="switchRoamyTab('budget')">
+                    <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                    <span class="tab-label">Бюджет</span>
+                </button>
+                <button type="button" class="roamy-tab-btn" data-tab="booking" onclick="switchRoamyTab('booking')">
+                    <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
+                    <span class="tab-label">Билеты и отели</span>
+                </button>
+                <button type="button" class="roamy-tab-btn" data-tab="tips" onclick="switchRoamyTab('tips')">
+                    <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
+                    <span class="tab-label">Лайфхаки</span>
+                </button>
+                <button type="button" class="roamy-tab-btn" data-tab="share" onclick="switchRoamyTab('share')">
+                    <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg></span>
+                    <span class="tab-label">Поделиться</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet for Example Route Confirmation -->
+    <div class="bs-overlay" id="routeBottomSheet" onclick="closeRouteSheet(event)">
+        <div class="bs-sheet" onclick="event.stopPropagation()">
+            <div class="bs-handle"></div>
+            <p class="bs-kicker">Осуществить поиск?</p>
+            <img class="bs-route-img" id="bsRouteImg" src="" alt="" />
+            <div class="bs-route-title" id="bsRouteTitle"></div>
+            <div class="bs-route-meta" id="bsRouteMeta"></div>
+            <div class="bs-route-tags" id="bsRouteTags"></div>
+            <div class="bs-actions">
+                <button type="button" class="bs-btn-cancel" onclick="closeRouteSheet()">Отмена</button>
+                <button type="button" class="bs-btn-go" id="bsRouteGo">Да</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Photo Lightbox -->
+    
+    <div class="place-sheet-overlay" id="placeSheetOverlay" onclick="if(event.target===this) closePlaceSheet()">
+        <div class="place-sheet" role="dialog" aria-modal="true">
+            <div class="place-sheet-grip"></div>
+            <button type="button" class="place-sheet-close" onclick="closePlaceSheet()" aria-label="Закрыть">✕</button>
+            <div class="place-sheet-main-wrap">
+                <img id="placeSheetMain" class="place-sheet-main" alt="" />
+                <button type="button" class="place-sheet-nav prev" onclick="placeSheetNav(-1)" aria-label="Назад">‹</button>
+                <button type="button" class="place-sheet-nav next" onclick="placeSheetNav(1)" aria-label="Вперёд">›</button>
+                <div class="place-sheet-counter" id="placeSheetCounter"></div>
+            </div>
+            <div class="place-sheet-gallery" id="placeSheetGallery"></div>
+            <div class="place-sheet-body">
+                <h3 class="place-sheet-title" id="placeSheetTitle"></h3>
+                <div class="place-sheet-addr" id="placeSheetAddr"></div>
+                <p class="place-sheet-desc" id="placeSheetDesc"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+        <div class="lightbox-hint">Нажмите, чтобы закрыть</div>
+    </div>
+
+    <div class="tb-paywall-overlay hidden" id="tbPaywall" onclick="if(event.target===this)closePaywall()">
+        <div class="tb-paywall-card" role="dialog" aria-labelledby="tbPaywallTitle">
+            <button type="button" class="tb-paywall-close" onclick="closePaywall()" aria-label="Закрыть">✕</button>
+            <div class="tb-paywall-kicker">TravelBase Plus</div>
+            <h3 id="tbPaywallTitle">Дни 3+ открываются по подписке</h3>
+            <p>Первые два дня этого направления остаются бесплатными и больше не меняются. Полный маршрут, кабинет и новые генерации — в Plus. Оплата картами РФ и СНГ.</p>
+            <a class="tb-paywall-cta" href="/?tab=pricing" onclick="event.preventDefault(); closePaywall(); switchMainTab('pricing');">Открыть все дни</a>
+            <a class="tb-paywall-link" href="/offer">Публичная оферта</a>
+        </div>
+    </div>
+

@@ -1,0 +1,6 @@
+node_modules
+.vercel
+.git
+index.html
+*.log
+.DS_Store

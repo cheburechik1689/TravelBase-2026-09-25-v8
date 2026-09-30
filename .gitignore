@@ -1,0 +1,11 @@
+node_modules
+.vercel
+.tanstack
+dist
+screenshots
+.env
+.env.*
+*.log
+
+# knowledge-base crawler local state
+data/
