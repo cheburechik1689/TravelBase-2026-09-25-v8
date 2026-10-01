@@ -8508,3 +8508,300 @@ function __tbReady(fn) {
             try { window.__tbBoot(); } catch (e) { console.error('TravelBase boot', e); window.__tbBootError = String(e && e.stack || e); }
         });
 
+
+// ─── Квиз подбора направления (POST /api/match-destinations) ───
+const QUIZ_QUESTIONS = [
+    {
+        key: 'style', title: 'Какой у вас стиль путешествий?', subtitle: 'От темпа зависит подбор направления',
+        options: [
+            { value: 'active', icon: '🥾', label: 'Активный', note: 'горы, тропы, максимум впечатлений' },
+            { value: 'calm', icon: '🌊', label: 'Спокойный', note: 'море, променады, расслабленный темп' },
+            { value: 'mixed', icon: '⚖️', label: 'Смешанный', note: 'и активность, и отдых' },
+        ],
+    },
+    {
+        key: 'visa', title: 'Готовы ли оформлять визу?', subtitle: 'Учтём только реально доступные направления',
+        options: [
+            { value: 'any', icon: '🛂', label: 'Готов оформлять', note: 'виза не помеха' },
+            { value: 'no-visa', icon: '✈️', label: 'Только безвиз', note: 'без визы или виза по прилёту' },
+            { value: 'russia-only', icon: '🇷🇺', label: 'Только Россия', note: 'путешествуем внутри страны' },
+        ],
+    },
+    {
+        key: 'budget', title: 'Какой бюджет на поездку?', subtitle: 'На человека, без фанатизма',
+        options: [
+            { value: 'low', icon: '🎒', label: 'Эконом', note: 'хостелы, стритфуд, автобусы' },
+            { value: 'mid', icon: '🏨', label: 'Средний', note: 'отель 3–4★, кафе, такси иногда' },
+            { value: 'high', icon: '💎', label: 'Не важен', note: 'комфорт важнее цены' },
+        ],
+    },
+    {
+        key: 'month', title: 'Когда планируете поездку?', subtitle: 'Подберём сезон на месте', compact: true,
+        options: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
+            .map((m) => ({ value: m.toLowerCase(), icon: '🗓', label: m })),
+    },
+    {
+        key: 'companions', title: 'С кем едете?', subtitle: 'Влияет на темп и логистику',
+        options: [
+            { value: 'solo', icon: '🧭', label: 'Один', note: 'свобода маршрута' },
+            { value: 'couple', icon: '💑', label: 'Пара', note: 'романтика и уют' },
+            { value: 'family', icon: '👨‍👩‍👧', label: 'С семьёй', note: 'дети, спокойная логистика' },
+            { value: 'friends', icon: '🎉', label: 'С друзьями', note: 'компания и движ' },
+        ],
+    },
+    {
+        key: 'climate', title: 'Климат и перелёт', subtitle: 'Выберите климат, потом задайте лимит перелёта', withFlight: true,
+        options: [
+            { value: 'warm', icon: '☀️', label: 'Тепло', note: 'пляжи и лето круглый год' },
+            { value: 'mild', icon: '🌤', label: 'Умеренно', note: 'комфортные прогулки' },
+            { value: 'any', icon: '🌍', label: 'Неважно', note: 'главное — впечатления' },
+        ],
+    },
+];
+let quizStep = 0;
+let quizAnswers = {};
+
+function openQuiz() {
+    quizStep = 0;
+    quizAnswers = { flightHours: 0 };
+    document.body.classList.add('quiz-mode');
+    document.getElementById('quizResults')?.classList.add('hidden');
+    document.getElementById('quizScreen')?.classList.remove('hidden');
+    renderQuizQuestion();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function closeQuiz() {
+    document.body.classList.remove('quiz-mode');
+    document.getElementById('quizScreen')?.classList.add('hidden');
+    document.getElementById('quizResults')?.classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function restartQuiz() {
+    quizStep = 0;
+    quizAnswers = { flightHours: 0 };
+    document.getElementById('quizResults')?.classList.add('hidden');
+    document.getElementById('quizScreen')?.classList.remove('hidden');
+    renderQuizQuestion();
+}
+
+function quizPrev() {
+    if (quizStep > 0) {
+        quizStep -= 1;
+        renderQuizQuestion();
+    }
+}
+
+function renderQuizQuestion() {
+    const q = QUIZ_QUESTIONS[quizStep];
+    if (!q) return;
+    const back = document.getElementById('quizBackBtn');
+    if (back) back.style.visibility = quizStep === 0 ? 'hidden' : 'visible';
+    const label = document.getElementById('quizProgressLabel');
+    if (label) label.textContent = `Вопрос ${quizStep + 1} из ${QUIZ_QUESTIONS.length}`;
+    const fill = document.getElementById('quizProgressFill');
+    if (fill) fill.style.width = `${((quizStep + 1) / QUIZ_QUESTIONS.length) * 100}%`;
+    const title = document.getElementById('quizTitle');
+    if (title) title.textContent = q.title;
+    const subtitle = document.getElementById('quizSubtitle');
+    if (subtitle) subtitle.textContent = q.subtitle || '';
+
+    const box = document.getElementById('quizOptions');
+    if (box) {
+        box.innerHTML = '';
+        box.classList.toggle('quiz-options-compact', Boolean(q.compact));
+        for (const opt of q.options) {
+            const el = document.createElement('button');
+            el.type = 'button';
+            el.className = 'quiz-option' + (quizAnswers[q.key] === opt.value ? ' is-selected' : '');
+            el.innerHTML =
+                (q.compact ? '' : `<span class="quiz-option-icon">${opt.icon}</span>`) +
+                `<span class="quiz-option-body"><b>${opt.label}</b>` +
+                (opt.note ? `<span class="quiz-option-note">${opt.note}</span>` : '') +
+                '</span>';
+            el.onclick = () => selectQuizOption(q, opt.value);
+            box.appendChild(el);
+        }
+    }
+
+    const flight = document.getElementById('quizFlightBlock');
+    if (flight) {
+        flight.classList.toggle('hidden', !q.withFlight || !quizAnswers.climate);
+        const range = document.getElementById('quizFlightRange');
+        if (range && q.withFlight && !range.dataset.quizBound) {
+            range.dataset.quizBound = '1';
+            range.addEventListener('input', () => {
+                const v = Number(range.value) || 0;
+                quizAnswers.flightHours = v;
+                const out = document.getElementById('quizFlightValue');
+                if (out) out.textContent = v === 0 ? 'не важно' : `до ${v} ч`;
+            });
+        }
+    }
+}
+
+function selectQuizOption(q, value) {
+    quizAnswers[q.key] = value;
+    if (q.withFlight) {
+        renderQuizQuestion(); // показываем блок перелёта
+        return;
+    }
+    // Мгновенная визуальная обратная связь, затем следующий вопрос.
+    const box = document.getElementById('quizOptions');
+    box?.querySelectorAll('.quiz-option').forEach((el) => el.classList.remove('is-selected'));
+    const idx = q.options.findIndex((o) => o.value === value);
+    box?.children[idx]?.classList.add('is-selected');
+    setTimeout(() => {
+        quizStep = Math.min(quizStep + 1, QUIZ_QUESTIONS.length - 1);
+        renderQuizQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 220);
+}
+
+async function submitQuiz() {
+    const btn = document.getElementById('quizSubmitBtn');
+    btn?.classList.add('is-loading');
+    if (btn) btn.disabled = true;
+
+    // Полноэкранный лоадер с честным N из базы знаний.
+    document.getElementById('quizScreen')?.classList.add('hidden');
+    document.body.classList.remove('quiz-mode');
+    document.body.classList.add('loading-mode');
+    const loading = document.getElementById('loading');
+    if (loading) loading.classList.remove('hidden');
+    const sub = document.querySelector('#loading .ls-subtitle-new');
+    if (sub) sub.textContent = 'Сопоставляем ваши ответы с базой направлений...';
+    fetch('/api/kb-stats')
+        .then((r) => r.json())
+        .then((s) => {
+            const n = Number(s && s.kbPlaces) || 0;
+            if (n > 0 && sub) sub.textContent = `Сопоставляем ваши ответы с базой из ${n} направлений...`;
+        })
+        .catch(() => {});
+    if (typeof startLoadingAnimation === 'function') startLoadingAnimation();
+
+    const finish = () => {
+        if (loading) loading.classList.add('hidden');
+        document.body.classList.remove('loading-mode');
+        btn?.classList.remove('is-loading');
+        if (btn) btn.disabled = false;
+    };
+    const backToQuiz = () => {
+        finish();
+        document.body.classList.add('quiz-mode');
+        document.getElementById('quizScreen')?.classList.remove('hidden');
+    };
+
+    try {
+        const resp = await fetch('/api/match-destinations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                style: quizAnswers.style || 'mixed',
+                visa: quizAnswers.visa || 'any',
+                budget: quizAnswers.budget || 'mid',
+                month: quizAnswers.month || '',
+                companions: quizAnswers.companions || 'couple',
+                climate: quizAnswers.climate || 'any',
+                flightHours: Number(quizAnswers.flightHours) || 0,
+            }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.success || !Array.isArray(data.results) || !data.results.length) {
+            throw new Error(data.error || 'Не удалось подобрать направления');
+        }
+        finish();
+        document.body.classList.add('quiz-mode');
+        renderQuizResults(data);
+        document.getElementById('quizResults')?.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    } catch (e) {
+        backToQuiz();
+        const subtitle = document.getElementById('quizSubtitle');
+        if (subtitle) subtitle.textContent = `⚠️ ${e.message}. Попробуйте ещё раз.`;
+    }
+}
+
+const QUIZ_CRITERIA = [
+    ['style', 'Стиль'], ['budget', 'Бюджет'], ['season', 'Сезон'],
+    ['climate', 'Климат'], ['visa', 'Виза'], ['flight', 'Перелёт'],
+];
+
+function quizScoreCell(v) {
+    const n = Number(v) || 0;
+    return `<div class="quiz-score"><div class="quiz-score-bar"><i style="width:${n * 10}%"></i></div><span>${n}/10</span></div>`;
+}
+
+function renderQuizResults(data) {
+    const results = data.results;
+    const sub = document.getElementById('quizResultsSubtitle');
+    if (sub) {
+        const src = data.source === 'ai' ? 'оценка ИИ по базе знаний' : 'оценка по профилям направлений';
+        sub.textContent = `${results.length} направления по вашей анкете · ${src}. Нажмите на направление, чтобы собрать маршрут.`;
+    }
+
+    // Десктоп: сравнительная таблица (колонка = направление).
+    const tableWrap = document.getElementById('quizTableWrap');
+    if (tableWrap) {
+        let html = '<table class="quiz-table"><thead><tr><th></th>';
+        for (const r of results) {
+            html += `<th class="quiz-col-head" data-city="${r.city}" data-country="${r.country}" data-flag="${r.flag}">` +
+                `<div class="quiz-col-flag">${r.flag}</div><b>${r.city}</b><span>${r.country}</span></th>`;
+        }
+        html += '</tr></thead><tbody>';
+        html += '<tr class="quiz-row-match"><td>Совпадение</td>' +
+            results.map((r) => `<td class="quiz-match-pct">${r.matchPercent}%</td>`).join('') + '</tr>';
+        for (const [key, label] of QUIZ_CRITERIA) {
+            html += `<tr><td>${label}</td>` +
+                results.map((r) => `<td>${quizScoreCell(r.scores?.[key])}</td>`).join('') + '</tr>';
+        }
+        html += '<tr class="quiz-row-reason"><td></td>' +
+            results.map((r) => `<td class="quiz-reason">${r.reason || ''}</td>`).join('') + '</tr>';
+        html += '</tbody></table>';
+        tableWrap.innerHTML = html;
+        tableWrap.querySelectorAll('.quiz-col-head').forEach((th) => {
+            th.onclick = () => chooseQuizDestination(th.dataset.city, th.dataset.country, th.dataset.flag);
+        });
+    }
+
+    // Мобильный: карточки с полосой совпадения и аккордеоном деталей.
+    const cards = document.getElementById('quizCards');
+    if (cards) {
+        cards.innerHTML = '';
+        results.forEach((r, i) => {
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.innerHTML =
+                `<div class="quiz-card-head" data-i="${i}">` +
+                `<span class="quiz-card-flag">${r.flag}</span>` +
+                `<div class="quiz-card-title"><b>${r.city}</b><span>${r.country}</span></div>` +
+                `<div class="quiz-card-pct">${r.matchPercent}%</div></div>` +
+                `<div class="quiz-match-bar"><i style="width:${r.matchPercent}%"></i></div>` +
+                `<p class="quiz-reason">${r.reason || ''}</p>` +
+                `<button type="button" class="quiz-card-more" data-i="${i}">Критерии ▾</button>` +
+                `<div class="quiz-card-details hidden" id="quizCardDetails${i}">` +
+                QUIZ_CRITERIA.map(([key, label]) =>
+                    `<div class="quiz-card-crit"><span>${label}</span>${quizScoreCell(r.scores?.[key])}</div>`,
+                ).join('') +
+                `</div>` +
+                `<button type="button" class="quiz-card-choose">Собрать маршрут →</button>`;
+            card.querySelector('.quiz-card-more').onclick = (e) => {
+                e.stopPropagation();
+                const det = card.querySelector(`#quizCardDetails${i}`);
+                det?.classList.toggle('hidden');
+                e.target.textContent = det?.classList.contains('hidden') ? 'Критерии ▾' : 'Критерии ▴';
+            };
+            card.querySelector('.quiz-card-choose').onclick = () => chooseQuizDestination(r.city, r.country, r.flag);
+            card.querySelector('.quiz-card-head').onclick = () => chooseQuizDestination(r.city, r.country, r.flag);
+            cards.appendChild(card);
+        });
+    }
+}
+
+function chooseQuizDestination(city, country, flag) {
+    selectUnifiedDestination(city, country, flag || '🌍');
+    closeQuiz();
+    // Главный экран с выбранным чипом; дальше пользователь жмёт «Собрать маршрут».
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}

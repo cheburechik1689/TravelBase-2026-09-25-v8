@@ -15,6 +15,7 @@ export default tseslint.config(
       ".nitro/**",
       "node_modules/**",
       "src/routeTree.gen.ts",
+      "public/vendor/**",
     ],
   },
   js.configs.recommended,
@@ -40,6 +41,26 @@ export default tseslint.config(
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
+    // Продуктовый vanilla-скрипт (public/travelbase.js) — классический файл без
+    // модульной границы: глобалы из других инлайн-скриптов и HTML, нестрогие
+    // паттерны. Линтим предупреждениями, блочные правила для браузерного
+    // легаси-кода отключены точечно.
+    files: ["public/**/*.js"],
+    rules: {
+      "no-undef": "off",
+      "no-empty": "off",
+      "no-misleading-character-class": "off",
+      "no-useless-escape": "off",
+      "no-unreachable": "off",
+      "no-redeclare": "off",
+      "no-cond-assign": "off",
+      "no-this-alias": "off",
+      "no-control-regex": "off",
+      "no-useless-assignment": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
     },
   },
   // Disable rules that conflict with Prettier formatting.

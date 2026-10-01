@@ -278,7 +278,9 @@ function tokenIdentityKey(token: string): string {
             .digest("base64url");
         }
       }
-    } catch {}
+    } catch {
+      // Лучший эффорт: при любой ошибке уходим на простой хеш токена ниже.
+    }
   }
   return createHash("sha256").update(token).digest("base64url");
 }

@@ -7,6 +7,7 @@ import {
   PRESET_RUSSIA,
 } from "./catalog";
 import { knowledgeSuggest, generatePlan, swapPlace } from "./generate";
+import { matchDestinations } from "./match";
 import { catalogForCity } from "./search";
 import {
   geocodePlace,
@@ -261,6 +262,18 @@ export async function handleTravelApi(request: Request, splat: string): Promise<
         if (!result.ok) return json({ success: false, error: result.error }, result.status);
         const { ok: _ok, ...rest } = result;
         return json({ success: true, ...rest });
+      }
+      case "match-destinations": {
+        const matchUser = await optionalUser(request);
+        const limited = checkRateLimit("match-destinations", rateLimitKey(request, matchUser?.id));
+        if (!limited.ok) return rateLimitResponse(limited.retryAfterSec);
+        const result = await matchDestinations(body);
+        return json({
+          success: true,
+          results: result.results,
+          source: result.source,
+          candidatesCount: result.candidatesCount,
+        });
       }
       case "geocode": {
         const place = str(body.place);

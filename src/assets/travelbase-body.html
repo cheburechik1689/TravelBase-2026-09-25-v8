@@ -131,6 +131,14 @@
             </div>
         </div>
 
+        <div class="s1-dream quiz-entry" id="quizEntry">
+            <button type="button" class="s1-dream-trigger" onclick="openQuiz()">
+                <span class="s1-dream-icon quiz-entry-icon" aria-hidden="true"></span>
+                <span class="s1-dream-text">Подобрать варианты: ответьте на 6 вопросов</span>
+                <svg class="s1-dream-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+        </div>
+
         <div class="s1-cities-section" id="s1SectionWorld">
             <div class="s1-cities-label">
                 <span>Мир</span>
@@ -787,3 +795,44 @@
         </div>
     </div>
 
+
+    <!-- Квиз подбора направления: отдельный экран (body.quiz-mode) -->
+    <div id="quizScreen" class="section hidden">
+        <div class="quiz-wrap">
+            <div class="quiz-top">
+                <button type="button" class="quiz-back" id="quizBackBtn" onclick="quizPrev()">← Назад</button>
+                <div class="quiz-progress">
+                    <div class="quiz-progress-label" id="quizProgressLabel">Вопрос 1 из 6</div>
+                    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+                </div>
+                <button type="button" class="quiz-close" onclick="closeQuiz()" aria-label="Закрыть">✕</button>
+            </div>
+            <h2 class="quiz-title" id="quizTitle"></h2>
+            <p class="quiz-subtitle" id="quizSubtitle"></p>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="quiz-flight hidden" id="quizFlightBlock">
+                <label class="quiz-flight-label" for="quizFlightRange">
+                    Максимум часов перелёта: <b id="quizFlightValue">не важно</b>
+                </label>
+                <input type="range" class="quiz-flight-range" id="quizFlightRange" min="0" max="12" step="1" value="0">
+                <button type="button" class="quiz-submit" id="quizSubmitBtn" onclick="submitQuiz()">
+                    <span class="quiz-submit-text">Показать направления</span>
+                    <span class="s1-dream-submit-spinner"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quizResults" class="section hidden">
+        <div class="quiz-wrap quiz-results-wrap">
+            <div class="quiz-top">
+                <button type="button" class="quiz-back" onclick="restartQuiz()">← Пройти заново</button>
+                <div class="quiz-progress"></div>
+                <button type="button" class="quiz-close" onclick="closeQuiz()" aria-label="Закрыть">✕</button>
+            </div>
+            <h2 class="quiz-title">Ваши направления</h2>
+            <p class="quiz-subtitle" id="quizResultsSubtitle"></p>
+            <div class="quiz-table-wrap" id="quizTableWrap"></div>
+            <div class="quiz-cards" id="quizCards"></div>
+        </div>
+    </div>

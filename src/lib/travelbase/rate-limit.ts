@@ -11,6 +11,7 @@ const WINDOW_MS = 10 * 60 * 1000;
 const LIMITS = {
   generate: 10,
   "knowledge-suggest": 20,
+  "match-destinations": 10,
 } as const;
 
 export type RateLimitScope = keyof typeof LIMITS;

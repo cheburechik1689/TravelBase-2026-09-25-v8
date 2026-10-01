@@ -16,6 +16,7 @@ export function destinationKey(raw: string) {
 
 export function sanitizeUserText(input: string, maxLen: number) {
   let s = String(input || "")
+    // eslint-disable-next-line no-control-regex -- диапазон управляющих символов здесь и есть цель фильтра
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, " ")
     .replace(/\s+/g, " ")
     .trim()

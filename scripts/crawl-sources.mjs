@@ -215,7 +215,7 @@ function makeFetch({ robotsByHost, state, log, deadline }) {
       } catch (err) {
         lastErr = err;
         // Сетевой сбой — ретрай; истёкший дедлайн источника — сразу наружу.
-        if (deadline && Date.now() > deadline) throw new Error("source timeout");
+        if (deadline && Date.now() > deadline) throw new Error("source timeout", { cause: err });
       }
     }
     throw lastErr || new Error("fetch failed");
@@ -363,7 +363,7 @@ async function main() {
     // документа определяет destinationGuess, сматченный на PRESET-списки.
     let destGroups;
     if (adapter.broadcast) {
-      let items = [];
+      let items;
       try {
         items = (await adapter.discover(null, ctx)) || [];
       } catch (err) {

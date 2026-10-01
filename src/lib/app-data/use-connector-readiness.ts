@@ -62,6 +62,7 @@ export function useRefetchWhenConnectorReady(
   useEffect(() => {
     if (!waiting) return;
     if (!isFramed()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- разовая установка при монтировании, до первого рендера iframe-ветки
       setNotEmbedded(true);
       return () => setNotEmbedded(false);
     }

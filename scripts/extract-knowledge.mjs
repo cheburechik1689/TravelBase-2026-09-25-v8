@@ -165,7 +165,7 @@ async function main() {
       const norm = destinationKey(place.name);
       if (!norm || seenNames.has(norm)) continue;
       seenNames.add(norm);
-      let geo = null;
+      let geo;
       const wait = GEOCODE_INTERVAL_MS - (Date.now() - lastGeocode);
       if (wait > 0) await sleep(wait);
       lastGeocode = Date.now();

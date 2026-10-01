@@ -39,7 +39,8 @@ async function open() {
     return toSql(run);
   }
   const { PGlite } = await import("@electric-sql/pglite");
-  const dbDir = path.join(ROOT, "data", "kb.db");
+  // KB_DB_PATH — переопределение пути (тесты изолируются в временную базу).
+  const dbDir = process.env.KB_DB_PATH || path.join(ROOT, "data", "kb.db");
   await mkdir(path.dirname(dbDir), { recursive: true });
   const pg = new PGlite(dbDir);
   await pg.waitReady;
